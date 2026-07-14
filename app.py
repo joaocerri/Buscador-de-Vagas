@@ -15,10 +15,10 @@ for job in data['jobs']:
     totSkills = 0
     for skill in skills:
         if skill.lower() in job_description.lower() or skill.lower() in job_title.lower():
-            totSkills += 1
+            finded_skills.append(skill)
 
-    if totSkills > 0:
+    if len(finded_skills) > 0:
         print(f"Job Title: {job_title}")
         print(f"Description: {job_description}")
-        print(f"Required Skill: {skill}")
+        print(f"Skills that match: {finded_skills}")
         print("-" * 40)

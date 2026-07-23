@@ -1,5 +1,7 @@
 import requests as r
 from datetime import datetime
+import os
+
 
 skills =  []
 exclude_words = []
@@ -8,14 +10,28 @@ answer = ""
 while answer != "0" and answer != "1":
     answer = input("Type the skill you want to search or 0 to exit: ")
     if(answer != "0" and answer != "1"):
-        skills.append(answer)
+        if(answer not in skills):
+            skills.append(answer)
 
 answer = ""
 
 while answer != "0":
     answer = input("Type the word you want to exclude or 0 to exit: ")
     if(answer != "0" and answer != "1"):
-        exclude_words.append(answer)
+        if(answer not in exclude_words):
+            exclude_words.append(answer)
+
+if len(skills) == 0:
+    os.system('cls')
+    print("No skills provided. Exiting.")
+    exit()
+
+else:
+    os.system('cls')
+    print(f"Searching for jobs with skills: {skills}")
+    print(f"Excluding jobs with words: {exclude_words}")
+    os.system('pause')
+    os.system('cls')
 
 current_date = datetime.now().date()
 

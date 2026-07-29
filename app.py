@@ -1,73 +1,72 @@
+import os
 import requests as r
 from datetime import datetime
-import os
+
+from user import User
+from job import Job
+
+def main():
+    user = User()
+
+    while True:
+        answer = input("Type the skill you want to search (or 0 to finish): ").strip()
+        if answer == "0":
+            break
+        user.set_skills(answer)
+
+    while True:
+        answer = input("Type the word you want to exclude (or 0 to finish): ").strip()
+        if answer == "0":
+            break
+        user.set_exclude_words(answer)
+
+    if not user.get_skills():
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print("No skills provided. Exiting.")
+        return
+
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print(f"Searching for jobs with skills: {user.get_skills()}")
+    print(f"Excluding jobs with words: {user.get_exclude_words()}")
+    print("-" * 40)
+
+    url = "https://apis.codante.io/api/job-board/jobs"
+
+    try:
+        response = r.get(url)
+        data = response.json()
+
+        jobs_encontrados = 0
+
+        for job_data in data.get('data', []):
+
+            job = Job(
+                title=job_data.get('title', ''),
+                description=job_data.get('description', ''),
+                updated_at=job_data.get('updated_at', '')
+            )
+
+            if not job.is_recent():
+                continue
+
+            if job.have_exclude_word(user.get_exclude_words()):
+                continue
+
+            matched_skills = job.match_skills(user.get_skills())
+
+            if matched_skills:
+                jobs_encontrados += 1
+                print(f"Job Title: {job.title}")
+                print(f"Company: {job_data.get('company', 'N/A')}")
+                print(f"Skills matched: {matched_skills}")
+                print(f"Updated at: {job.updated_at[:10]}")
+                print("-" * 40)
+
+        print(f"\nSearch completed! Total of jobs found: {jobs_encontrados}")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 
-skills =  []
-exclude_words = []
-answer = ""
-
-while answer != "0" and answer != "1":
-    answer = input("Type the skill you want to search or 0 to exit: ")
-    if(answer != "0" and answer != "1"):
-        if(answer not in skills):
-            skills.append(answer)
-
-answer = ""
-
-while answer != "0":
-    answer = input("Type the word you want to exclude or 0 to exit: ")
-    if(answer != "0" and answer != "1"):
-        if(answer not in exclude_words):
-            exclude_words.append(answer)
-
-if len(skills) == 0:
-    os.system('cls')
-    print("No skills provided. Exiting.")
-    exit()
-
-else:
-    os.system('cls')
-    print(f"Searching for jobs with skills: {skills}")
-    print(f"Excluding jobs with words: {exclude_words}")
-    os.system('pause')
-    os.system('cls')
-
-current_date = datetime.now().date()
-
-url = "https://apis.codante.io/api/job-board/jobs"
-
-try:
-    response = r.get(url)
-    data = response.json()
-
-    for job in data.get('data'):
-
-        job_title = job.get('title')
-        job_description = job.get('description')
-        found_skills = []
-        date = datetime.strptime(job.get('updated_at')[:10], "%Y-%m-%d").date()
-        total_days = (current_date - date).days
-        has_exclude_word = False
-
-        for word in exclude_words:
-            if word.lower() in job_description.lower() or word.lower() in job_title.lower():
-                has_exclude_word = True
-
-        if has_exclude_word:
-            continue 
-
-        if total_days <= 30:
-            for skill in skills:
-                if skill.lower() in job_description.lower() or skill.lower() in job_title.lower():
-                    found_skills.append(skill)
-
-        if len(found_skills) > 0:
-            print(f"Job Title: {job_title}")
-            print(f"Company: {job.get('company')}")
-            print(f"Description: {job_description}")
-            print(f"Skills that match: {found_skills}")
-            print(f"Date Posted: {date}")
-            print("-" * 40)
-except Exception as e:
-    print(f"An error occurred: {e}")
+if __name__ == "__main__":
+    main()

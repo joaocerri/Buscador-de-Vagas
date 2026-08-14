@@ -16,7 +16,7 @@ CREATE TABLE
 CREATE TABLE
     skills (
         id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-        nome VARCHAR(100) UNIQUE NOT NULL
+        skill VARCHAR(100) UNIQUE NOT NULL
     );
 
 CREATE TABLE
@@ -26,4 +26,10 @@ CREATE TABLE
         PRIMARY KEY (vaga_id, skill_id),
         FOREIGN KEY (vaga_id) REFERENCES vagas (id) ON DELETE CASCADE,
         FOREIGN KEY (skill_id) REFERENCES skills (id) ON DELETE CASCADE
+    );
+
+CREATE TABLE
+    exclude_words (
+        id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        word VARCHAR(100) UNIQUE NOT NULL
     );

@@ -4,20 +4,42 @@ from datetime import datetime
 
 from user import User
 from job import Job
+from connection import Connection
 
 def main():
     user = User()
+    con = Connection("localhost", "buscador_vagas", "postgres", "181006") 
+    
+    aux = con.consultar("SELECT skill FROM skills")
+    user_skills = []
+    for skill in aux:
+        user_skills.append(skill[0])
 
     while True:
         answer = input("Type the skill you want to search (or 0 to finish): ").strip()
         if answer == "0":
             break
+        if answer in user.get_skills() or answer in user_skills:
+            print(f"Skill '{answer}' already exists.")
+            continue
         user.set_skills(answer)
+        os.system('cls' if os.name == 'nt' else 'clear')
 
+
+    for skill in user.get_skills():
+        if skill not in user_skills:
+            con.manipular(f"INSERT INTO skills (skill) VALUES ('{skill}')")
+        else:
+            print(f"Skill '{skill}' already exists in the database.")
+
+    for skill in user_skills:
+        user.set_skills(skill)
+        
     while True:
         answer = input("Type the word you want to exclude (or 0 to finish): ").strip()
         if answer == "0":
             break
+        os.system('cls' if os.name == 'nt' else 'clear')
         user.set_exclude_words(answer)
 
     if not user.get_skills():
@@ -36,7 +58,7 @@ def main():
         response = r.get(url)
         data = response.json()
 
-        jobs_encontrados = 0
+        found_jobs = 0
 
         for job_data in data.get('data', []):
 
@@ -55,14 +77,14 @@ def main():
             matched_skills = job.match_skills(user.get_skills())
 
             if matched_skills:
-                jobs_encontrados += 1
+                found_jobs += 1
                 print(f"Job Title: {job.title}")
                 print(f"Company: {job_data.get('company', 'N/A')}")
                 print(f"Skills matched: {matched_skills}")
                 print(f"Updated at: {job.updated_at[:10]}")
                 print("-" * 40)
 
-        print(f"\nSearch completed! Total of jobs found: {jobs_encontrados}")
+        print(f"\nSearch completed! Total of jobs found: {found_jobs}")
 
     except Exception as e:
         print(f"An error occurred: {e}")

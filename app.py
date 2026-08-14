@@ -15,6 +15,11 @@ def main():
     for skill in aux:
         user_skills.append(skill[0])
 
+    aux = con.consultar("SELECT word FROM exclude_words")
+    user_exclude_words = []
+    for word in aux:
+        user_exclude_words.append(word[0])
+
     while True:
         answer = input("Type the skill you want to search (or 0 to finish): ").strip()
         if answer == "0":
@@ -39,8 +44,20 @@ def main():
         answer = input("Type the word you want to exclude (or 0 to finish): ").strip()
         if answer == "0":
             break
+        if answer in user.get_exclude_words() or answer in user_exclude_words:
+            print(f"Word '{answer}' already exists.")
+            continue
         os.system('cls' if os.name == 'nt' else 'clear')
         user.set_exclude_words(answer)
+
+    for word in user.get_exclude_words():
+        if word not in user_exclude_words:
+            con.manipular(f"INSERT INTO exclude_words (word) VALUES ('{word}')")
+        else:
+            print(f"Word '{word}' already exists in the database.")
+
+    for word in user_exclude_words:
+        user.set_exclude_words(word)
 
     if not user.get_skills():
         os.system('cls' if os.name == 'nt' else 'clear')

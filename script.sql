@@ -1,11 +1,11 @@
 CREATE TABLE
-    usuarios (
+    users (
         id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
         username VARCHAR(150) NOT NULL
     );
 
 CREATE TABLE
-    vagas (
+    job (
         id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
         title VARCHAR(150) NOT NULL,
         jobdescription TEXT NOT NULL,
@@ -20,11 +20,11 @@ CREATE TABLE
     );
 
 CREATE TABLE
-    vaga_skills (
-        vaga_id INTEGER NOT NULL,
+    job_skills (
+        job_id INTEGER NOT NULL,
         skill_id INTEGER NOT NULL,
-        PRIMARY KEY (vaga_id, skill_id),
-        FOREIGN KEY (vaga_id) REFERENCES vagas (id) ON DELETE CASCADE,
+        PRIMARY KEY (job_id, skill_id),
+        FOREIGN KEY (job_id) REFERENCES job (id) ON DELETE CASCADE,
         FOREIGN KEY (skill_id) REFERENCES skills (id) ON DELETE CASCADE
     );
 
